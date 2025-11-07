@@ -17,9 +17,9 @@ public class Conversor {
             System.out.println("\nSeleccione una opción:");
             System.out.println("1. Realizar nueva conversión");
             System.out.println("2. Ver historial de esta sesión");
-            System.out.println("3. Ver historial guardado en archivo");
+            System.out.println("3. Ver todo el historial de conversiones");
             System.out.println("4. Salir");
-            int opcion = ValidarDatos.leerEntero(scanner, "Ingrese su opción: ", 1, 4);
+            int opcion = ValidarDatos.leerEntero(scanner, "Ingrese una opción: ", 1, 4);
 
             switch (opcion) {
                 case 1 -> realizarConversion();
