@@ -1,7 +1,11 @@
 package excepciones;
-//Lanza errores específicos cuando ocurre erro en la conversión (Conversor/ConversorAPI)
-public class ConversionExcepcion extends Exception{
-    public ConversionExcepcion(String mensaje){
+
+public class ConversionExcepcion extends RuntimeException {
+    public ConversionExcepcion(String mensaje) {
         super(mensaje);
+    }
+
+    public ConversionExcepcion(String mensaje, Throwable causa) {
+        super(mensaje, causa);
     }
 }

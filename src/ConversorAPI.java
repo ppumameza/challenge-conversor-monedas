@@ -1,35 +1,34 @@
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import excepciones.ConversionExcepcion;
-
-import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-//Conexión con la API, interpretar las respuestas JSON y manejo de posibles errores
+
 public class ConversorAPI {
-    //Clase encargada de conectar a la API para optener tasas de cambio
-    private static final String API_URL = "https://open.er-api.com/v6/latest/";
-    private static final Gson gson = new Gson();
+    private static final String BASE_URL = "https://v6.exchangerate-api.com/v6/74f877e5da1ce7ff6d3f4bd0/latest/";
 
-    public static double optenerTasaCambio(String from, String to) throws ConversionExcepcion{
-        String url = API_URL + from;
-
-        HttpClient client = HttpClient.newBuilder().build();
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).build();
+    public static double obtenerTasaCambio(String base, String destino) {
         try {
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() != 200){
-                throw new ConversionExcepcion("Error al optener datos de la API: " + response.statusCode());
-            }
-            JsonObject json = gson.fromJson(response.body(), JsonObject.class);
-            JsonObject rates = json.getAsJsonObject("rates");
-            if (!rates.has(to)) throw new ConversionExcepcion("No se encontró la moneda de destino: " + to);
-            return rates.get(to).getAsDouble();
-        }catch (IOException | InterruptedException e){
-            throw new ConversionExcepcion("No se pudo conectar con la API. Verifique su conexión.");
-        }
+            URI direccion = URI.create(BASE_URL + base);
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(direccion)
+                    .build();
 
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            Gson gson = new Gson();
+            RespuestaAPI datos = gson.fromJson(response.body(), RespuestaAPI.class);
+
+            if (datos.getConversion_rates().containsKey(destino)) {
+                return datos.getConversion_rates().get(destino);
+            } else {
+                throw new RuntimeException("No se encontró la tasa para " + destino);
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error al obtener tasas: " + e.getMessage());
+        }
     }
 }
+

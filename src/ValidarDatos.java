@@ -1,32 +1,49 @@
-import java.util.InputMismatchException;
 import java.util.Scanner;
-//Manejo de posibles errores
+
 public class ValidarDatos {
-    public static int leerEntero(Scanner scanner, String mensaje, int min, int max){
-        while (true){
+
+    public static int leerEntero(Scanner scanner, String mensaje, int min, int max) {
+        int valor;
+        while (true) {
+            System.out.print(mensaje);
             try {
-                System.out.println(mensaje);
-                int opcion = scanner.nextInt();
-                if (opcion < min || opcion > max){
-                    System.out.println("⚠ Opción fuera del rango. Intente nuevamente");
-                }else {
-                    return opcion;
+                valor = Integer.parseInt(scanner.nextLine());
+                if (valor < min || valor > max) {
+                    System.out.println("⚠️ Ingrese un número entre " + min + " y " + max);
+                } else {
+                    return valor;
                 }
-            }catch (InputMismatchException e){
-                System.out.println("⚠ Dato inválida. Debe ingresar un número entero");
-                scanner.nextLine();
+            } catch (NumberFormatException e) {
+                System.out.println("⚠️ Por favor, ingrese un número válido.");
             }
         }
     }
 
-    public static double leerDoble (Scanner scanner, String mensaje){
-        while (true){
+    public static double leerDoble(Scanner scanner, String mensaje) {
+        double valor;
+        while (true) {
+            System.out.print(mensaje);
             try {
-                System.out.println(mensaje);
-                return scanner.nextDouble();
-            }catch (InputMismatchException e){
-                System.out.println("⚠ Dato inválido. Debe ingresar un número válido (Ejem: 10.5)");
-                scanner.nextLine();
+                valor = Double.parseDouble(scanner.nextLine());
+                if (valor <= 0) {
+                    System.out.println("⚠️ El monto debe ser mayor que cero.");
+                } else {
+                    return valor;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("⚠️ Ingrese un número válido.");
+            }
+        }
+    }
+
+    public static String leerMoneda(Scanner scanner, String mensaje) {
+        while (true) {
+            System.out.print(mensaje);
+            String codigo = scanner.nextLine().trim().toUpperCase();
+            if (codigo.matches("^[A-Z]{3}$")) {
+                return codigo;
+            } else {
+                System.out.println("⚠️ Ingrese un código de moneda válido (3 letras, ej. USD, EUR, PEN).");
             }
         }
     }

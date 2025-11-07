@@ -1,56 +1,57 @@
-import java.util.List;
 import java.util.Scanner;
 
 public class Conversor {
-    //Clase que controla el flujo del programa
     private final Scanner scanner;
-    private final List<Moneda> monedas;
+    private final Historial historial = new Historial();
 
-    public Conversor(Scanner scanner){
+    public Conversor(Scanner scanner) {
         this.scanner = scanner;
-        this.monedas = List.of(
-                new Moneda("USD", "Dólar estadounidense"),
-                new Moneda("EUR", "Euro"),
-                new Moneda("PEN", "Sol peruano"),
-                new Moneda("GBP", "Libra esterlina"),
-                new Moneda("JPY", "Yen japonés")
-        );
-    }
-    public void iniciar(){
-        System.out.println("---CONVERSOR DE MONEDAS---");
-        ejecutarConversor();
     }
 
-    private void ejecutarConversor(){
-        mostrarMonedas();
-        int opcionBase = ValidarDatos.leerEntero(scanner, "Seleccione su moneda base: ", 1, monedas.size());
-        Moneda base = monedas.get(opcionBase - 1);
+    public void iniciar() {
+        System.out.println("=========================================");
+        System.out.println("   CONVERSOR DE MONEDAS - EN TIEMPO REAL ");
+        System.out.println("=========================================");
 
-        double monto = ValidarDatos.leerDoble(scanner, "ingrese el monto que desea convertir");
+        while (true) {
+            System.out.println("\nSeleccione una opción:");
+            System.out.println("1. Realizar nueva conversión");
+            System.out.println("2. Ver historial de esta sesión");
+            System.out.println("3. Ver historial guardado en archivo");
+            System.out.println("4. Salir");
+            int opcion = ValidarDatos.leerEntero(scanner, "Ingrese su opción: ", 1, 4);
 
-        System.out.println("\nSeleccione la moneda destino");
-        mostrarMonedas();
-        int opcionDestino = ValidarDatos.leerEntero(scanner, "seleccione su moneda destino: ",1, monedas.size());
-        Moneda destino = monedas.get(opcionDestino - 1);
+            switch (opcion) {
+                case 1 -> realizarConversion();
+                case 2 -> historial.mostrar();
+                case 3 -> HistorialArchivo.mostrarHistorialArchivo();
+                case 4 -> {
+                    System.out.println("👋 Gracias por usar el conversor.");
+                    return;
+                }
+            }
+        }
+    }
+
+    private void realizarConversion() {
+        String base = ValidarDatos.leerMoneda(scanner, "Ingrese el código de la moneda base (ej. USD, PEN, EUR): ");
+        double monto = ValidarDatos.leerDoble(scanner, "Ingrese el monto a convertir: ");
+        String destino = ValidarDatos.leerMoneda(scanner, "Ingrese el código de la moneda destino (ej. JPY, GBP, CLP): ");
+
+        System.out.println("\n🔄 Obteniendo tasas desde la API...\n");
 
         try {
-            double tasa = ConversorAPI.optenerTasaCambio(base.getCodigo(), destino.getCodigo());
+            double tasa = ConversorAPI.obtenerTasaCambio(base, destino);
             double convertido = monto * tasa;
-            System.out.printf("💱 %.2f %s = %.2f %s%n", monto, base.getCodigo(), convertido, destino.getCodigo());
+
+            System.out.printf("💱 Resultado:\n%.2f %s = %.2f %s%n", monto, base.toUpperCase(), convertido, destino.toUpperCase());
+            System.out.printf("(Tasa de cambio: %.4f)%n", tasa);
+
+            // Guardar en historial (memoria y archivo)
+            historial.agregar(new Conversion(base.toUpperCase(), destino.toUpperCase(), monto, convertido, tasa));
+
         } catch (Exception e) {
             System.out.println("❌ Error: " + e.getMessage());
-        }
-        System.out.println("\n¿Desea realizar otra conversión? (s/n): ");
-        String respuesta = scanner.next().trim().toLowerCase();
-        if (respuesta.equals("s")){
-            ejecutarConversor();
-        }else {
-            System.out.println("👋 Gracias por usar el conversor.");
-        }
-    }
-    private void mostrarMonedas(){
-        for (int i = 0; i <monedas.size(); i++){
-            System.out.println((i + 1) + "." + monedas.get(i));
         }
     }
 }
